@@ -192,6 +192,23 @@ class PygameHangman:
         if self.parts_visible['head']:
             pygame.draw.circle(self.screen, (230,230,230), (cx, cy), 18, 0)
             pygame.draw.circle(self.screen, (0,0,0), (cx, cy), 18, 2)
+            # Add character-specific features
+            if self.character_selected == 'angry':
+                # Top hat for character 1
+                hat_w = 14
+                hat_h = 7
+                brim_h = 3
+                pygame.draw.rect(self.screen, (0,0,0), (cx-hat_w//2, cy-18-6, hat_w, hat_h))
+                pygame.draw.rect(self.screen, (0,0,0), (cx-hat_w, cy-18-6+hat_h, hat_w*2, brim_h))
+            elif self.character_selected == 'short':
+                # Mustache for character 2
+                pygame.draw.line(self.screen, (0,0,0), (cx - 10, cy + 4), (cx - 2, cy + 2), 2)
+                pygame.draw.line(self.screen, (0,0,0), (cx + 10, cy + 4), (cx + 2, cy + 2), 2)
+                pygame.draw.line(self.screen, (0,0,0), (cx - 4, cy + 5), (cx + 4, cy + 5), 1)
+            elif self.character_selected == 'witchy':
+                # Eyebrows for character 3
+                pygame.draw.line(self.screen, (0,0,0), (cx - 11, cy - 8), (cx - 3, cy - 10), 2)
+                pygame.draw.line(self.screen, (0,0,0), (cx + 3, cy - 10), (cx + 11, cy - 8), 2)
         # Body
         if self.parts_visible['body']:
             pygame.draw.line(self.screen, (0,0,0), (cx, cy+18), (cx, cy+88), 2)
@@ -262,15 +279,15 @@ class PygameHangman:
         pygame.draw.rect(self.screen, (0,0,0), rect1, 2)
         label = self.small_font.render('1', True, (0,0,0))
         self.screen.blit(label, label.get_rect(center=(rect1.centerx, rect1.bottom+10)))
-        # Middle: blank hangman
+        # Middle: blank hangman with mustache (choice 2)
         rect2 = pygame.Rect(base_x+spacing, top_y, icon_size, icon_size*2)
-        self.draw_character_icon('blankman', rect2.centerx, rect2.centery-10, small=True)
+        self.draw_character_icon('blankman_mustache', rect2.centerx, rect2.centery-10, small=True)
         pygame.draw.rect(self.screen, (0,0,0), rect2, 2)
         label = self.small_font.render('2', True, (0,0,0))
         self.screen.blit(label, label.get_rect(center=(rect2.centerx, rect2.bottom+10)))
-        # Right: blank hangman
+        # Right: blank hangman with eyebrows (choice 3)
         rect3 = pygame.Rect(base_x+2*spacing+50, top_y, icon_size, icon_size*2)
-        self.draw_character_icon('blankman', rect3.centerx, rect3.centery-10, small=True)
+        self.draw_character_icon('blankman_eyebrows', rect3.centerx, rect3.centery-10, small=True)
         pygame.draw.rect(self.screen, (0,0,0), rect3, 2)
         label = self.small_font.render('3', True, (0,0,0))
         self.screen.blit(label, label.get_rect(center=(rect3.centerx, rect3.bottom+10)))
@@ -289,18 +306,47 @@ class PygameHangman:
             # Blank hangman head (plain circle)
             pygame.draw.circle(self.screen, (230,230,230), (cx, cy-offset), r, 0)
             pygame.draw.circle(self.screen, (0,0,0), (cx, cy-offset), r, 2)
+        elif char == 'blankman_mustache':
+            r = int(18 * scale)
+            offset = int(20 * scale)
+            # Head
+            pygame.draw.circle(self.screen, (230,230,230), (cx, cy-offset), r, 0)
+            pygame.draw.circle(self.screen, (0,0,0), (cx, cy-offset), r, 2)
+            # Eyes
+            eye_r = max(1, int(2 * scale))
+            pygame.draw.circle(self.screen, (0,0,0), (cx - int(6*scale), cy - offset + int(2*scale)), eye_r)
+            pygame.draw.circle(self.screen, (0,0,0), (cx + int(6*scale), cy - offset + int(2*scale)), eye_r)
+            # Mustache (simple lines)
+            line_w = max(1, int(2 * scale))
+            pygame.draw.line(self.screen, (0,0,0), (cx - int(10*scale), cy - offset + int(4*scale)), (cx - int(2*scale), cy - offset + int(2*scale)), line_w)
+            pygame.draw.line(self.screen, (0,0,0), (cx + int(10*scale), cy - offset + int(4*scale)), (cx + int(2*scale), cy - offset + int(2*scale)), line_w)
+            pygame.draw.line(self.screen, (0,0,0), (cx - int(4*scale), cy - offset + int(5*scale)), (cx + int(4*scale), cy - offset + int(5*scale)), max(1, int(1*scale)))
+        elif char == 'blankman_eyebrows':
+            r = int(18 * scale)
+            offset = int(20 * scale)
+            # Head
+            pygame.draw.circle(self.screen, (230,230,230), (cx, cy-offset), r, 0)
+            pygame.draw.circle(self.screen, (0,0,0), (cx, cy-offset), r, 2)
+            # Eyes
+            eye_r = max(1, int(2 * scale))
+            pygame.draw.circle(self.screen, (0,0,0), (cx - int(6*scale), cy - offset + int(2*scale)), eye_r)
+            pygame.draw.circle(self.screen, (0,0,0), (cx + int(6*scale), cy - offset + int(2*scale)), eye_r)
+            # Eyebrows (slanted lines above eyes)
+            line_w = max(1, int(2 * scale))
+            pygame.draw.line(self.screen, (0,0,0), (cx - int(11*scale), cy - offset - int(8*scale)), (cx - int(3*scale), cy - offset - int(10*scale)), line_w)
+            pygame.draw.line(self.screen, (0,0,0), (cx + int(3*scale), cy - offset - int(10*scale)), (cx + int(11*scale), cy - offset - int(8*scale)), line_w)
         elif char == 'blankman_hat':
             r = int(18 * scale)
             offset = int(20 * scale)
             # Blank hangman head (plain circle)
             pygame.draw.circle(self.screen, (230,230,230), (cx, cy-offset), r, 0)
             pygame.draw.circle(self.screen, (0,0,0), (cx, cy-offset), r, 2)
-            # Small top hat (fits within frame)
-            hat_w = int(14 * scale)
-            hat_h = int(7 * scale)
-            brim_h = int(3 * scale)
-            pygame.draw.rect(self.screen, (0,0,0), (cx-hat_w//2, cy-offset-r-6, hat_w, hat_h))
-            pygame.draw.rect(self.screen, (0,0,0), (cx-hat_w, cy-offset-r-6+hat_h, hat_w*2, brim_h))
+            # Small top hat (fits within frame) - reduced size
+            hat_w = int(10 * scale)
+            hat_h = int(4 * scale)
+            brim_h = int(2 * scale)
+            pygame.draw.rect(self.screen, (0,0,0), (cx-hat_w//2, cy-offset-r-4, hat_w, hat_h))
+            pygame.draw.rect(self.screen, (0,0,0), (cx-hat_w-2, cy-offset-r-4+hat_h, hat_w*2+4, brim_h))
 
     def spawn_confetti(self):
         # create small confetti pieces
